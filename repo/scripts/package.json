@@ -1,0 +1,20 @@
+{
+    "name": "so69-scripts",
+    "version": "1.0.0",
+    "description": "Ingestion scripts for So69-NN-Onboarding",
+    "main": "index.js",
+    "scripts": {
+        "ingest:cards": "ts-node ingest_cards_from_excel.ts",
+        "ingest:lessons": "ts-node ingest_lessons_from_md.ts"
+    },
+    "dependencies": {
+        "@supabase/supabase-js": "^2.39.0",
+        "dotenv": "^16.3.1",
+        "xlsx": "^0.18.5"
+    },
+    "devDependencies": {
+        "@types/node": "^20.10.0",
+        "ts-node": "^10.9.1",
+        "typescript": "^5.3.2"
+    }
+}
