@@ -23,17 +23,16 @@ export default async function CardPage({ params }: { params: { id: string } }) {
       return <div>Card not found</div>
   }
 
-  // Fetch approved lesson
-  // Prioritize English for now, fallback logic could be added
-  const { data: lesson, error: lessonError } = await supabase
+  // Fetch all approved lessons
+  const { data: lessons, error: lessonError } = await supabase
     .from('lessons')
     .select('*')
     .eq('card_id', id)
     .eq('status', 'approved')
-    .eq('language', 'en') // Hardcoded to EN for simplicity in this skeleton
     .order('version', { ascending: false })
-    .limit(1)
-    .single()
+
+  // Select best lesson (Prioritize EN, fallback to any)
+  const lesson = lessons?.find(l => l.language === 'en') || lessons?.[0];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -67,6 +66,7 @@ export default async function CardPage({ params }: { params: { id: string } }) {
                         </div>
                     </div>
                 )}
+                
             </div>
         </main>
     </div>
