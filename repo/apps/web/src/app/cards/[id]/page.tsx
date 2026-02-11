@@ -3,9 +3,9 @@ import { redirect } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import Link from 'next/link'
 
-export default async function CardPage({ params }: { params: { id: string } }) {
+export default async function CardPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
-  const { id } = params
+  const { id } = await params
   
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
@@ -69,7 +69,7 @@ export default async function CardPage({ params }: { params: { id: string } }) {
 
 
                 {/* DEBUG SECTION - DIAGNOSING VERCEL ISSUE */}
-                <div className="mt-8 p-4 bg-gray-100 rounded border border-gray-300 text-xs font-mono">
+                <div className="mt-8 p-4 bg-gray-100 rounded border border-gray-300 text-sm font-mono text-black">
                     <p><strong>DEBUG INFO (Vercel):</strong></p>
                     <p>Card ID: {id}</p>
                     <p>Lessons Found: {lessons?.length || 0}</p>
