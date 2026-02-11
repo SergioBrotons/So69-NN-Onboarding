@@ -14,7 +14,7 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const OUTPUT_DIR = path.join(__dirname, '../docs/generated/lms_exports');
+const OUTPUT_DIR = path.join(process.cwd(), '../docs/generated/lms_exports');
 
 if (!fs.existsSync(OUTPUT_DIR)) {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });

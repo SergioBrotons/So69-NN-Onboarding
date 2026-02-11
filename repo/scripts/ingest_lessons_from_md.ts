@@ -14,59 +14,88 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const LESSONS_DIR_EN = path.join(__dirname, '../docs/generated/lessons/en');
-const LESSONS_DIR_ES = path.join(__dirname, '../docs/generated/lessons/es');
+// Scan both the "generated" internal folder AND the user's source folders
+const DIRS_TO_SCAN = [
+  { path: path.join(process.cwd(), '../docs/generated/lessons/en'), lang: 'en' },
+  { path: path.join(process.cwd(), '../docs/generated/lessons/es'), lang: 'es' },
+  { path: path.join(process.cwd(), '../../Lessons/EN'), lang: 'en' },
+  { path: path.join(process.cwd(), '../../Lessons/ES'), lang: 'es' }
+];
 
-async function ingestLessons(dir: string, lang: 'en' | 'es') {
-  console.log(`Scanning directory: ${dir}`);
-  if (!fs.existsSync(dir)) {
-      console.warn(`Directory does not exist: ${dir}`);
-      return;
-  }
-
-  const files = fs.readdirSync(dir);
-
-  for (const file of files) {
-    if (!file.endsWith('.md')) continue;
-
-    // Expected format: {Card_ID}__{version}.md
-    // Example: C001__1.md
-    const regex = /^(.*)__(\d+)\.md$/;
-    const match = file.match(regex);
-
-    if (!match) {
-      console.warn(`Skipping file with invalid naming format: ${file}`);
-      continue;
+async function ingestLessons() {
+  for (const { path: dir, lang } of DIRS_TO_SCAN) {
+    console.log(`Scanning directory: ${dir}`);
+    if (!fs.existsSync(dir)) {
+        console.warn(`Directory does not exist: ${dir}`);
+        continue;
     }
 
-    const cardId = match[1];
-    const version = parseInt(match[2]);
-    const content = fs.readFileSync(path.join(dir, file), 'utf-8');
+    const files = fs.readdirSync(dir);
 
-    console.log(`Processing ${file} -> Card: ${cardId}, Version: ${version}, Lang: ${lang}`);
+    for (const file of files) {
+      if (!file.endsWith('.md')) continue;
 
-    const { error } = await supabase
-      .from('lessons')
-      .upsert({
-        card_id: cardId,
-        version: version,
-        language: lang,
-        content: content,
-        status: 'approved', // Assuming generated content is approved
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'card_id, version, language' });
+      let cardId: string | null = null;
+      let version = 1;
 
-    if (error) {
-        console.error(`Error upserting lesson for ${file}:`, error.message);
-    } else {
-        console.log(`Upserted lesson for ${file}`);
+      // Pattern 1: {Card_ID}__{Version}.md (Generated)
+      const regexGenerated = /^(.*)__(\d+)\.md$/;
+      // Pattern 2: {Card_ID}_{Title}.md (User Source)
+      // Supports: COMP-01_Title, ROLE-EXEC-01_Title
+      const regexUser = /^([a-zA-Z0-9-]+)_(.*)\.md$/;
+      // Pattern 3: {Card_ID}.md (Simple)
+      const regexSimple = /^([a-zA-Z0-9-]+)\.md$/;
+
+      const matchGen = file.match(regexGenerated);
+      const matchUser = file.match(regexUser);
+      const matchSimple = file.match(regexSimple);
+
+      if (matchGen) {
+          cardId = matchGen[1];
+          version = parseInt(matchGen[2]);
+      } else if (matchUser) {
+          cardId = matchUser[1];
+          version = 1; // Default to version 1 for source files
+      } else if (matchSimple) {
+          cardId = matchSimple[1];
+          version = 1;
+      }
+
+      if (!cardId) {
+        console.warn(`Skipping file with unrecognized naming format: ${file}`);
+        continue;
+      }
+
+      const content = fs.readFileSync(path.join(dir, file), 'utf-8');
+
+      console.log(`Processing ${file} -> Card: ${cardId}, Version: ${version}, Lang: ${lang}`);
+
+      const { error } = await supabase
+        .from('lessons')
+        .upsert({
+          card_id: cardId,
+          version: version,
+          language: lang,
+          content: content,
+          status: 'approved',
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'card_id, version, language' });
+
+      if (error) {
+          if (error.code === '23503') { // Foreign key violation
+             console.warn(`SKIPPING lesson for ${file}: Card ID '${cardId}' not found in database.`);
+          } else {
+             console.error(`Error upserting lesson for ${file}:`, error.message);
+          }
+      } else {
+          console.log(`Upserted lesson for ${file}`);
+      }
     }
   }
 }
 
 async function main() {
-    await ingestLessons(LESSONS_DIR_EN, 'en');
-    await ingestLessons(LESSONS_DIR_ES, 'es');
+    await ingestLessons();
     console.log('Lesson ingestion complete.');
 }
 

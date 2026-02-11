@@ -15,7 +15,7 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const EXCEL_PATH = path.join(__dirname, '../data/cards_repository.xlsx');
+const EXCEL_PATH = path.join(process.cwd(), '../data/cards_repository.xlsx');
 
 async function ingestCards() {
   console.log(`Reading Excel file from: ${EXCEL_PATH}`);
@@ -28,9 +28,13 @@ async function ingestCards() {
   const workbook = XLSX.readFile(EXCEL_PATH);
   const sheetName = workbook.SheetNames[0];
   const sheet = workbook.Sheets[sheetName];
-  const data = XLSX.utils.sheet_to_json(sheet);
+  const data: any[] = XLSX.utils.sheet_to_json(sheet);
 
   console.log(`Found ${data.length} rows.`);
+  if (data.length > 0) {
+      console.log('First row keys:', Object.keys(data[0]));
+      console.log('First row sample:', data[0]);
+  }
 
   for (const row of data as any[]) {
     // Map Excel columns to DB columns
