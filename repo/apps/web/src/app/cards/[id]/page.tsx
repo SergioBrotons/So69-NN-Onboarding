@@ -48,7 +48,7 @@ export default async function CardPage({ params }: { params: Promise<{ id: strin
         <main className="mx-auto max-w-4xl py-6 sm:px-6 lg:px-8">
             <div className="px-4 py-6 sm:px-0">
                 {lesson ? (
-                    <article className="prose prose-lg mx-auto bg-white p-8 rounded-lg shadow">
+                    <article className="prose prose-lg prose-slate mx-auto bg-white p-8 rounded-lg shadow text-gray-900">
                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{lesson.content}</ReactMarkdown>
                     </article>
                 ) : (
