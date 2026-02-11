@@ -66,7 +66,7 @@ export default async function CardPage({ params }: { params: { id: string } }) {
                         </div>
                     </div>
                 )}
-                )}
+
 
                 {/* DEBUG SECTION - DIAGNOSING VERCEL ISSUE */}
                 <div className="mt-8 p-4 bg-gray-100 rounded border border-gray-300 text-xs font-mono">
