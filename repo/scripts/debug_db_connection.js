@@ -1,0 +1,28 @@
+const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config();
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Missing Supabase credentials in .env');
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+async function countLessons() {
+  console.log('Connecting to:', supabaseUrl);
+  
+  const { count, error } = await supabase
+    .from('lessons')
+    .select('*', { count: 'exact', head: true });
+  
+  if (error) {
+    console.error('Count Error:', error);
+  } else {
+    console.log('Total Lessons in DB:', count);
+  }
+}
+
+countLessons();
