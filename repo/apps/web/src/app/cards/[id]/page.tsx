@@ -19,9 +19,9 @@ export default async function CardPage({ params }: { params: { id: string } }) {
     .eq('id', id)
     .single()
 
-  if (cardError || !card) {
-      return <div>Card not found</div>
-  }
+  // if (cardError || !card) {
+  //     return <div>Card not found</div>
+  // }
 
   // Fetch all approved lessons
   const { data: lessons, error: lessonError } = await supabase
@@ -40,7 +40,7 @@ export default async function CardPage({ params }: { params: { id: string } }) {
             <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between">
                     <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                        {card.title_en} <span className="text-gray-400 text-lg">({card.id})</span>
+                        {card?.title_en || 'Card Not Found'} <span className="text-gray-400 text-lg">({id})</span>
                     </h1>
                      <Link href="/dashboard" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
                         &larr; Back to Dashboard
