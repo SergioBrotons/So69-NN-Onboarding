@@ -55,6 +55,10 @@ The source of truth for the curriculum structure is
 `repo/data/cards_repository.xlsx`. The source of truth for generated lessons is
 `repo/docs/generated/lessons`.
 
+**Lesson Filename Format:** Lesson files must follow the pattern:
+`{Card_ID}__{Version}.md` (e.g., `C001__1.md` or `COMP-01__1.md`). Files not
+matching this pattern will be skipped by the ingestion script.
+
 **Do not manually edit the database for content that originates in these
 files.** Use the ingestion scripts.
 
