@@ -66,7 +66,17 @@ export default async function CardPage({ params }: { params: { id: string } }) {
                         </div>
                     </div>
                 )}
-                
+                )}
+
+                {/* DEBUG SECTION - DIAGNOSING VERCEL ISSUE */}
+                <div className="mt-8 p-4 bg-gray-100 rounded border border-gray-300 text-xs font-mono">
+                    <p><strong>DEBUG INFO (Vercel):</strong></p>
+                    <p>Card ID: {id}</p>
+                    <p>Lessons Found: {lessons?.length || 0}</p>
+                    <p>Selected Lesson ID: {lesson?.id}</p>
+                    <p>Language: {lesson?.language}</p>
+                    <p>Error: {lessonError ? JSON.stringify(lessonError) : 'None'}</p>
+                </div>
             </div>
         </main>
     </div>
